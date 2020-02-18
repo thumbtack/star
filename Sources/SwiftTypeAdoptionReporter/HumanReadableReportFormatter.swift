@@ -16,12 +16,14 @@ public class HumanReadableReportFormatter: ReportFormatter {
     public init() {
     }
 
-    public func format(_ usageCounts: [String: Int]) -> String {
+    public func format(_ usageCounts: [String: TypeUsage]) -> String {
         let sortedUsageCounts = usageCounts.sorted(by: { $0.key < $1.key })
 
         var output = ""
-        for (componentName, usageCount) in sortedUsageCounts {
-            output += "\(componentName) used \(usageCount) time\(usageCount != 1 ? "s" : "").\n"
+        for (componentName, typeUsage) in sortedUsageCounts {
+            let fileCount = typeUsage.fileCount
+            let usageCount = typeUsage.usageCount
+            output += "\(componentName) used \(usageCount) time\(usageCount != 1 ? "s" : "") in \(fileCount) file\(fileCount != 1 ? "s" : "").\n"
         }
         return output.trimmingCharacters(in: .whitespacesAndNewlines)
     }

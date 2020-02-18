@@ -14,13 +14,27 @@
 
 import Foundation
 
+private struct EncodableTypeUsage: Encodable {
+    let name: String
+    let fileCount: Int
+    let usageCount: Int
+}
+
 public class JSONReportFormatter: ReportFormatter {
     public init() {
     }
 
-    public func format(_ usageCounts: [String: Int]) -> String {
+    public func format(_ usageCounts: [String: TypeUsage]) -> String {
+        let encodableTypeUsages = usageCounts.map({ name, typeUsage in
+            EncodableTypeUsage(
+                name: name,
+                fileCount: typeUsage.fileCount,
+                usageCount: typeUsage.usageCount
+            )
+        })
+
         let encoder = JSONEncoder()
-        let data = try! encoder.encode(usageCounts)
+        let data = try! encoder.encode(encodableTypeUsages)
         return String(data: data, encoding: .utf8)!
     }
 }
