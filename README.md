@@ -1,3 +1,5 @@
+[![Build Status](https://badgen.net/travis/thumbtack/star)](https://travis-ci.com/thumbtack/star)
+
 # STAR: Swift Type Adoption Reporter
 
 Generate reports on how frequently specified Swift types are being used in your iOS codebase with a simple command-line interface.
