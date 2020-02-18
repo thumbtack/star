@@ -27,14 +27,22 @@ public class FastStrategy: Strategy {
         self.verbose = verbose
     }
 
-    public func findUsageCounts() throws -> [String : Int] {
+    public func findUsageCounts() throws -> [String : TypeUsage] {
+        fileCounts = [:]
         usageCounts  = [:]
 
         for path in paths {
             try visit(fileOrDirectory: path)
         }
 
-        return usageCounts
+        var typeUsages: [String: TypeUsage] = [:]
+        for type in types {
+            typeUsages[type] = TypeUsage(
+                fileCount: fileCounts[type]?.count ?? 0,
+                usageCount: usageCounts[type] ?? 0
+            )
+        }
+        return typeUsages
     }
 
     enum Error: Swift.Error {
@@ -46,7 +54,9 @@ public class FastStrategy: Strategy {
     private let moduleName: String?
     private let paths: [AbsolutePath]
     private let verbose: Bool
+    private var fileCounts: [String: Set<AbsolutePath>] = [:]
     private var usageCounts: [String: Int] = [:]
+    private var currentFile: AbsolutePath?
 
     /**
     * - Parameters:
@@ -92,18 +102,9 @@ public class FastStrategy: Strategy {
             throw Error.noSuchFileOrDirectory
         }
 
-        let parsedSource = try SyntaxParser.parse(file.asURL)
-        var visitor = self
-        parsedSource.walk(&visitor)
-    }
+        currentFile = file
 
-    /**
-     * - Parameters:
-     *   - sourceString: String directly containing Swift source code.
-     *   - reporter: Reporter in which to store report.
-     */
-    private func visit(sourceString: String) throws {
-        let parsedSource = try SyntaxParser.parse(source: sourceString)
+        let parsedSource = try SyntaxParser.parse(file.asURL)
         var visitor = self
         parsedSource.walk(&visitor)
     }
@@ -270,14 +271,15 @@ extension FastStrategy: SyntaxVisitor {
             print(token.verboseDescription)
         }
 
-        let key: String
-        if let moduleName = moduleName {
-            key = "\(moduleName).\(identifier)"
-        } else {
-            key = identifier
-        }
+        usageCounts[identifier] = (usageCounts[identifier] ?? 0) + 1
 
-        usageCounts[key] = (usageCounts[key] ?? 0) + 1
+        if let currentFile = currentFile {
+            if fileCounts[identifier] != nil {
+                fileCounts[identifier]?.insert(currentFile)
+            } else {
+                fileCounts[identifier] = [currentFile]
+            }
+        }
     }
 }
 

@@ -13,5 +13,5 @@
 // limitations under the License.
 
 public protocol ReportFormatter: AnyObject {
-    func format(_ usageCounts: [String: Int]) -> String
+    func format(_ usageCounts: [String: TypeUsage]) -> String
 }

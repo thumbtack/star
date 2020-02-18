@@ -12,6 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+public struct TypeUsage {
+    /// Number of files this type was used in
+    let fileCount: Int
+
+    /// Number of times this type was used
+    let usageCount: Int
+}
+
 public protocol Strategy: AnyObject {
-    func findUsageCounts() throws -> [String: Int]
+    func findUsageCounts() throws -> [String: TypeUsage]
 }
