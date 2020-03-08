@@ -1,4 +1,6 @@
 [![Build Status](https://badgen.net/travis/thumbtack/star)](https://travis-ci.com/thumbtack/star)
+[![License](https://badgen.net/github/license/thumbtack/star)](https://github.com/thumbtack/star/blob/master/LICENSE)
+[![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-orange.svg)](https://swift.org/package-manager/)
 
 # STAR: Swift Type Adoption Reporter
 
