@@ -48,9 +48,9 @@ public class FastStrategy: Strategy {
                 guard let files = fileCounts[type] else { continue }
 
                 print("\(type) used in the following files:")
-                for file in files.map({ "  \($0.pathString)" }) {
-                    print(file)
-                }
+                files
+                    .map({  " \($0.pathString)" })
+                    .forEach { print($0) }
             }
         }
 
