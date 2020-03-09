@@ -42,6 +42,18 @@ public class FastStrategy: Strategy {
                 usageCount: usageCounts[type] ?? 0
             )
         }
+
+        if verbose {
+            for type in types {
+                guard let files = fileCounts[type] else { continue }
+
+                print("\(type) used in the following files:")
+                for file in files.map({ "  \($0.pathString)" }) {
+                    print(file)
+                }
+            }
+        }
+
         return typeUsages
     }
 
