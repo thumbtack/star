@@ -25,8 +25,9 @@ install: swift-type-adoption-reporter
 	@install -d "$(bindir)" "$(libdir)"
 	@install "$(BUILDDIR)/release/swift-type-adoption-reporter" "$(bindir)"
 	@install "$(BUILDDIR)/release/SwiftSyntax.swiftmodule" "$(libdir)"
+	@install "$(BUILDDIR)/release/libSwiftPM.dylib" "$(libdir)"
 	@install_name_tool -change \
-		"$(BUILDDIR)/x86_64-apple-macosx10.10/release/SwiftSyntax.swiftmodule" \
+		"$(BUILDDIR)/x86_64-apple-macosx/release/SwiftSyntax.swiftmodule" \
 		"$(libdir)/SwiftSyntax.swiftmodule" \
 		"$(bindir)/swift-type-adoption-reporter"
 	@if [ ! -e  "$(bindir)/star" ]; then ln -s "$(bindir)/swift-type-adoption-reporter" "$(bindir)/star"; fi
