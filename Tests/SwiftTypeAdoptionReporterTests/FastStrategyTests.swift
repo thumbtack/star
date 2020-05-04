@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Basic
+import TSCBasic
 import XCTest
 @testable import SwiftTypeAdoptionReporter
 
@@ -269,19 +269,20 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
         assert(!types.isEmpty, "If `expected` is an empty dictionary, a list of component identifiers to search for must be passed explicitly in the `types` argument. Otherwise the test won't really be testing anything.", file: file, line: line)
 
         do {
-            let tmpFile = try TemporaryFile()
-            tmpFile.fileHandle.write(sourceString.data(using: .utf8)!)
+            try withTemporaryFile { tmpFile in
+                tmpFile.fileHandle.write(sourceString.data(using: .utf8)!)
 
-            let strategy = FastStrategy(
-                types: types,
-                moduleName: moduleName,
-                paths: [tmpFile.path]
-            )
+                let strategy = FastStrategy(
+                    types: types,
+                    moduleName: moduleName,
+                    paths: [tmpFile.path]
+                )
 
-            let actual = (try strategy.findUsageCounts()).mapValues({ $0.usageCount })
-            XCTAssertEqual(expected, actual, file: file, line: line)
+                let actual = (try strategy.findUsageCounts()).mapValues({ $0.usageCount })
+                XCTAssertEqual(expected, actual, file: file, line: line)
+            }
         } catch {
-            XCTFail("Failed with error \(error.localizedDescription)", file: file, line: line)
+            XCTFail("Failed with error \(String(describing: error))", file: file, line: line)
         }
     }
 }

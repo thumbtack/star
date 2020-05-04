@@ -14,7 +14,7 @@
 
 import Foundation
 import SwiftTypeAdoptionReporter
-import SPMUtility
+import TSCUtility
 
 // MARK: - Arguments
 let argumentParser = ArgumentParser(

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Basic
+import TSCBasic
 import Foundation
 import SwiftSyntax
 
-public class FastStrategy: Strategy {
+public class FastStrategy: SyntaxVisitor, Strategy {
     public init(types: [String],
          moduleName: String?,
          paths: [AbsolutePath],
@@ -59,6 +59,162 @@ public class FastStrategy: Strategy {
 
     enum Error: Swift.Error {
         case noSuchFileOrDirectory
+    }
+
+    // MARK: - SyntaxVisitor
+    override public func visit(_ token: TokenSyntax) -> SyntaxVisitorContinueKind {
+        switch token.tokenKind {
+        case let .identifier(identifier) where types.contains(identifier):
+            increment(identifier, token: token)
+            return .skipChildren
+        default:
+            return .skipChildren
+        }
+    }
+
+    override public func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
+        guard let base = node.base else { return .visitChildren }
+
+        if let baseIdentifierExpr = base.as(IdentifierExprSyntax.self) {
+            if case let .identifier(baseIdentifier) = baseIdentifierExpr.identifier.tokenKind {
+                if types.contains(baseIdentifier) {
+                    increment(baseIdentifier, token: baseIdentifierExpr.identifier)
+                    return .skipChildren
+                }
+
+                if let moduleName = moduleName,
+                    baseIdentifier == moduleName,
+                    case let .identifier(identifier) = node.name.tokenKind,
+                    types.contains(identifier)
+                {
+                    increment(identifier, token: node.name)
+                    return .skipChildren
+                }
+            }
+
+            return .skipChildren
+
+        } else if let baseMemberAccessExpr = base.as(MemberAccessExprSyntax.self) {
+            if let moduleName = moduleName,
+                let innerBaseIdentifierExpr = baseMemberAccessExpr.base?.as(IdentifierExprSyntax.self),
+                case let .identifier(innerBaseIdentifier) = innerBaseIdentifierExpr.identifier.tokenKind,
+                innerBaseIdentifier == moduleName,
+                case let .identifier(innerIdentifier) = baseMemberAccessExpr.name.tokenKind,
+                types.contains(innerIdentifier)
+            {
+                increment(innerIdentifier, token: baseMemberAccessExpr.name)
+                return .skipChildren
+            }
+
+            return .skipChildren
+
+        }
+
+        return .visitChildren
+    }
+
+    override public func visit(_ node: MemberTypeIdentifierSyntax) -> SyntaxVisitorContinueKind {
+        if let moduleName = moduleName, let baseToken = node.baseType.as(SimpleTypeIdentifierSyntax.self)?.name {
+            switch baseToken.tokenKind {
+            case let .identifier(baseTokenIdentifier) where moduleName == baseTokenIdentifier:
+                return .visitChildren
+            default:
+                return .skipChildren
+            }
+        }
+
+        return .skipChildren
+    }
+
+    override public func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
+        switch node.identifier.tokenKind {
+        case let .identifier(identifier) where types.contains(identifier):
+            if verbose {
+                print("Skipping contents of \(identifier)'s implementation")
+            }
+
+            return .skipChildren
+        default:
+            return .visitChildren
+        }
+    }
+
+    override public func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
+        if let typeIdentifier = node.extendedType.as(SimpleTypeIdentifierSyntax.self) {
+            switch typeIdentifier.name.tokenKind {
+            case let .identifier(identifier) where types.contains(identifier):
+                if verbose {
+                    print("Skipping contents of extension of \(identifier)")
+                }
+
+                return .skipChildren
+            default:
+                return .visitChildren
+            }
+        }
+
+        return .visitChildren
+    }
+
+    override public func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+        switch node.identifier.tokenKind {
+        case let .identifier(identifier) where types.contains(identifier):
+            if verbose {
+                print("Skipping contents of \(identifier)'s implementation")
+            }
+
+            return .skipChildren
+        default:
+            return .visitChildren
+        }
+    }
+
+    override public func visit(_ node: UnknownSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: InOutExprSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: AssignmentExprSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: TypeExprSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: TypeAnnotationSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: TypeInitializerClauseSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: TypealiasDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: TypeInheritanceClauseSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: FunctionSignatureSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: AsTypePatternSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
+    override public func visit(_ node: AsExprSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
     }
 
     // MARK: - Private
@@ -117,165 +273,7 @@ public class FastStrategy: Strategy {
         currentFile = file
 
         let parsedSource = try SyntaxParser.parse(file.asURL)
-        var visitor = self
-        parsedSource.walk(&visitor)
-    }
-}
-
-// MARK: - SyntaxVisitor
-extension FastStrategy: SyntaxVisitor {
-    public func visit(_ token: TokenSyntax) -> SyntaxVisitorContinueKind {
-        switch token.tokenKind {
-        case let .identifier(identifier) where types.contains(identifier):
-            increment(identifier, token: token)
-            return .skipChildren
-        default:
-            return .skipChildren
-        }
-    }
-
-    public func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
-        switch node.base {
-        case let baseIdentifierExpr as IdentifierExprSyntax:
-            if case let .identifier(baseIdentifier) = baseIdentifierExpr.identifier.tokenKind {
-                if types.contains(baseIdentifier) {
-                    increment(baseIdentifier, token: baseIdentifierExpr.identifier)
-                    return .skipChildren
-                }
-
-                if let moduleName = moduleName,
-                    baseIdentifier == moduleName,
-                    case let .identifier(identifier) = node.name.tokenKind,
-                    types.contains(identifier)
-                {
-                    increment(identifier, token: node.name)
-                    return .skipChildren
-                }
-            }
-
-            return .skipChildren
-
-        case let baseMemberAccessExpr as MemberAccessExprSyntax:
-            if let moduleName = moduleName,
-                let innerBaseIdentifierExpr = baseMemberAccessExpr.base as? IdentifierExprSyntax,
-                case let .identifier(innerBaseIdentifier) = innerBaseIdentifierExpr.identifier.tokenKind,
-                innerBaseIdentifier == moduleName,
-                case let .identifier(innerIdentifier) = baseMemberAccessExpr.name.tokenKind,
-                types.contains(innerIdentifier)
-            {
-                increment(innerIdentifier, token: baseMemberAccessExpr.name)
-                return .skipChildren
-            }
-
-            return .skipChildren
-
-        default:
-            return .visitChildren
-        }
-    }
-
-    public func visit(_ node: MemberTypeIdentifierSyntax) -> SyntaxVisitorContinueKind {
-        if let moduleName = moduleName, let baseToken = (node.baseType as? SimpleTypeIdentifierSyntax)?.name {
-            switch baseToken.tokenKind {
-            case let .identifier(baseTokenIdentifier) where moduleName == baseTokenIdentifier:
-                return .visitChildren
-            default:
-                return .skipChildren
-            }
-        }
-
-        return .skipChildren
-    }
-
-    public func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        switch node.identifier.tokenKind {
-        case let .identifier(identifier) where types.contains(identifier):
-            if verbose {
-                print("Skipping contents of \(identifier)'s implementation")
-            }
-
-            return .skipChildren
-        default:
-            return .visitChildren
-        }
-    }
-
-    public func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
-        if let typeIdentifier = node.extendedType as? SimpleTypeIdentifierSyntax {
-            switch typeIdentifier.name.tokenKind {
-            case let .identifier(identifier) where types.contains(identifier):
-                if verbose {
-                    print("Skipping contents of extension of \(identifier)")
-                }
-
-                return .skipChildren
-            default:
-                return .visitChildren
-            }
-        }
-
-        return .visitChildren
-    }
-
-    public func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
-        switch node.identifier.tokenKind {
-        case let .identifier(identifier) where types.contains(identifier):
-            if verbose {
-                print("Skipping contents of \(identifier)'s implementation")
-            }
-
-            return .skipChildren
-        default:
-            return .visitChildren
-        }
-    }
-
-    public func visit(_ node: UnknownSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: InOutExprSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: AssignmentExprSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: TypeExprSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: TypeAnnotationSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: TypeInitializerClauseSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: TypealiasDeclSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: TypeInheritanceClauseSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: FunctionSignatureSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: AsTypePatternSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-
-    public func visit(_ node: AsExprSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        walk(parsedSource)
     }
 
     private func increment(_ identifier: String, token: TokenSyntax) {
@@ -299,7 +297,7 @@ extension FastStrategy: SyntaxVisitor {
 private extension TokenSyntax {
     var verboseDescription: String {
         // (Printing info about ancestor is typically more useful than printing the token syntax node itself.)
-        let node = parent?.parent?.parent ?? self
+        let node: CustomStringConvertible = parent?.parent?.parent ?? self
 
         var output = ""
         output += node.description
