@@ -21,5 +21,9 @@ public struct TypeUsage {
 }
 
 public protocol Strategy: AnyObject {
+    /// A Boolean value indicating whether the strategy should include subclass declaration
+    /// and protocol conformance in usage counts.
+    var includeTypeInheritance: Bool { get set }
+
     func findUsageCounts() throws -> [String: TypeUsage]
 }

@@ -17,6 +17,8 @@ import Foundation
 import SwiftSyntax
 
 public class FastStrategy: SyntaxVisitor, Strategy {
+    public var includeTypeInheritance: Bool = false
+
     public init(types: [String],
          moduleName: String?,
          paths: [AbsolutePath],
@@ -146,6 +148,19 @@ public class FastStrategy: SyntaxVisitor, Strategy {
         }
     }
 
+    override public func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
+        switch node.identifier.tokenKind {
+        case let .identifier(identifier) where types.contains(identifier):
+            if verbose {
+                print("Skipping contents of \(identifier)'s implementation")
+            }
+
+            return .skipChildren
+        default:
+            return .visitChildren
+        }
+    }
+
     override public func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
         if let typeIdentifier = node.extendedType.as(SimpleTypeIdentifierSyntax.self) {
             switch typeIdentifier.name.tokenKind {
@@ -205,7 +220,23 @@ public class FastStrategy: SyntaxVisitor, Strategy {
     }
 
     override public func visit(_ node: TypeInheritanceClauseSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        if includeTypeInheritance {
+            for inheritedType in node.inheritedTypeCollection {
+                guard let typeIdentifier = inheritedType.typeName.as(SimpleTypeIdentifierSyntax.self) else { continue }
+
+                switch typeIdentifier.name.tokenKind {
+                case let .identifier(identifier) where types.contains(identifier):
+                    increment(identifier, token: typeIdentifier.name)
+
+                default:
+                    break
+                }
+            }
+
+            return .skipChildren
+        } else {
+            return .skipChildren
+        }
     }
 
     override public func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
