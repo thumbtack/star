@@ -6,15 +6,9 @@
 
 set -e
 
-swiftlint_pkg_path=$(mktemp)
-SWIFTLINT_PKG_URL="https://github.com/realm/SwiftLint/releases/download/0.39.2/SwiftLint.pkg"
+brew update && brew install swiftlint
 
-curl $SWIFTLINT_PKG_URL -o $swiftlint_pkg_path
-
-if [ -f $SWIFTLINT_PKG_PATH ]; then
-    echo "SwiftLint package exists! Installing it..."
-    sudo installer -pkg $swiftlint_pkg_path -target /
-else
+if ! type swiftformat > /dev/null 2>&1; then
     echo "SwiftLint package doesn't exist. Compiling from source..." &&
     swiftlint_repo_path=$(mktemp) &&
     git clone https://github.com/realm/SwiftLint.git $swiftlint_repo_path &&
