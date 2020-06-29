@@ -8,5 +8,5 @@ install:
   - ./install_swiftformat.sh
 script:
   - swiftlint lint --quiet
-  - swiftformat .
+  - swiftformat --lint .
   - set -o pipefail && swift test
