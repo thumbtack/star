@@ -10,8 +10,9 @@ brew update && brew install swiftformat
 
 if ! type swiftformat >/dev/null 2>&1; then
     echo "SwiftFormat package doesn't exist. Compiling from source..." &&
-    git clone https://github.com/nicklockwood/SwiftFormat.git /tmp/SwiftFormat &&
-    cd /tmp/SwiftFormat &&
+    swiftformat_repo_path=$(mktemp) &&
+    git clone https://github.com/nicklockwood/SwiftFormat.git $swiftformat_repo_path &&
+    cd $swiftformat_repo_path &&
     git submodule update --init --recursive &&
     swift build -c release &&
     install .build/release/swiftformat /usr/local/bin
