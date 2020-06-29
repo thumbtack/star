@@ -111,4 +111,3 @@ do {
     fputs("\(error)\n", stderr)
     exit(EXIT_FAILURE)
 }
-

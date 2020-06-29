@@ -12,26 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import TSCBasic
 import Foundation
 import SwiftSyntax
+import TSCBasic
 
 public class FastStrategy: SyntaxVisitor, Strategy {
     public var includeTypeInheritance: Bool = false
 
     public init(types: [String],
-         moduleName: String?,
-         paths: [AbsolutePath],
-         verbose: Bool = false) {
+                moduleName: String?,
+                paths: [AbsolutePath],
+                verbose: Bool = false) {
         self.types = types
         self.moduleName = moduleName
         self.paths = paths
         self.verbose = verbose
     }
 
-    public func findUsageCounts() throws -> [String : TypeUsage] {
+    public func findUsageCounts() throws -> [String: TypeUsage] {
         fileCounts = [:]
-        usageCounts  = [:]
+        usageCounts = [:]
 
         for path in paths {
             try visit(fileOrDirectory: path)
@@ -51,7 +51,7 @@ public class FastStrategy: SyntaxVisitor, Strategy {
 
                 print("\(type) used in the following files:")
                 files
-                    .map({  " \($0.pathString)" })
+                    .map({ " \($0.pathString)" })
                     .forEach { print($0) }
             }
         }
@@ -94,8 +94,7 @@ public class FastStrategy: SyntaxVisitor, Strategy {
                 if let moduleName = moduleName,
                     baseIdentifier == moduleName,
                     case let .identifier(identifier) = node.name.tokenKind,
-                    types.contains(identifier)
-                {
+                    types.contains(identifier) {
                     increment(identifier, token: node.name)
                     return .skipChildren
                 }
@@ -109,14 +108,12 @@ public class FastStrategy: SyntaxVisitor, Strategy {
                 case let .identifier(innerBaseIdentifier) = innerBaseIdentifierExpr.identifier.tokenKind,
                 innerBaseIdentifier == moduleName,
                 case let .identifier(innerIdentifier) = baseMemberAccessExpr.name.tokenKind,
-                types.contains(innerIdentifier)
-            {
+                types.contains(innerIdentifier) {
                 increment(innerIdentifier, token: baseMemberAccessExpr.name)
                 return .skipChildren
             }
 
             return .skipChildren
-
         }
 
         return .visitChildren
@@ -265,10 +262,10 @@ public class FastStrategy: SyntaxVisitor, Strategy {
     private var currentFile: AbsolutePath?
 
     /**
-    * - Parameters:
-    *   - fileOrDirectory: Path of file/directory to parse.
-    *   - reporter: Reporter in which to store report.
-    */
+     * - Parameters:
+     *   - fileOrDirectory: Path of file/directory to parse.
+     *   - reporter: Reporter in which to store report.
+     */
     private func visit(fileOrDirectory: AbsolutePath) throws {
         let isDirectoryPointer = UnsafeMutablePointer<ObjCBool>.allocate(capacity: 1)
         guard FileManager.default.fileExists(atPath: fileOrDirectory.pathString, isDirectory: isDirectoryPointer) else {

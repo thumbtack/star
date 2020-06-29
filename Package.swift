@@ -28,12 +28,15 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "swift-type-adoption-reporter",
-            dependencies: ["SwiftTypeAdoptionReporter"]),
+            dependencies: ["SwiftTypeAdoptionReporter"]
+        ),
         .target(
             name: "SwiftTypeAdoptionReporter",
-            dependencies: ["SwiftSyntax", "SwiftPM"]),
+            dependencies: ["SwiftSyntax", "SwiftPM"]
+        ),
         .testTarget(
             name: "SwiftTypeAdoptionReporterTests",
-            dependencies: ["SwiftTypeAdoptionReporter"]),
+            dependencies: ["SwiftTypeAdoptionReporter"]
+        ),
     ]
 )
