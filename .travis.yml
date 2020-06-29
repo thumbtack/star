@@ -4,9 +4,7 @@ branches:
   only:
   - master
 install:
-  - ./install_swiftlint.sh
   - ./install_swiftformat.sh
 script:
-  - swiftlint lint --quiet
   - swiftformat .
   - set -o pipefail && swift test

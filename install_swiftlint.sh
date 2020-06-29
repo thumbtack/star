@@ -14,5 +14,5 @@ if ! type swiftformat > /dev/null 2>&1; then
     git clone https://github.com/realm/SwiftLint.git $swiftlint_repo_path &&
     cd $swiftlint_repo_path &&
     git submodule update --init --recursive &&
-    sudo make install
+    make install
 fi
