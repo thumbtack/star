@@ -8,9 +8,9 @@ set -e
 
 brew update && brew install swiftlint
 
-if ! type swiftformat > /dev/null 2>&1; then
+if ! type swiftlint > /dev/null 2>&1; then
     echo "SwiftLint package doesn't exist. Compiling from source..." &&
-    swiftlint_repo_path=$(mktemp) &&
+    swiftlint_repo_path=$(mktemp swiftlint.XXXX) &&
     git clone https://github.com/realm/SwiftLint.git $swiftlint_repo_path &&
     cd $swiftlint_repo_path &&
     git submodule update --init --recursive &&
