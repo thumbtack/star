@@ -65,7 +65,7 @@ do {
 
     guard let types = parsedArguments.get(typesArgument) else {
         fputs("Missing types to report on.\n", stderr)
-        exit(1)
+        exit(EXIT_FAILURE)
     }
 
     let moduleName = parsedArguments.get(moduleNameArgument)
@@ -73,7 +73,7 @@ do {
 
     guard let paths = parsedArguments.get(pathsArgument) else {
         fputs("Missing paths to report on.\n", stderr)
-        exit(1)
+        exit(EXIT_FAILURE)
     }
 
     let strategy = FastStrategy(
@@ -91,19 +91,16 @@ do {
         formatter = JSONReportFormatter()
     default:
         fputs("Invalid format specified. Valid formats are \"humanReadable\" (default), \"json\"\n", stderr)
-        exit(1)
+        exit(EXIT_FAILURE)
     }
 
     let usageCounts = try strategy.findUsageCounts()
     let output = formatter.format(usageCounts)
 
     fputs("\(output)\n", stdout)
-    exit(0)
-} catch let error as ArgumentParserError {
-    fputs("\(error.description)\n", stderr)
-    exit(1)
+    exit(EXIT_SUCCESS)
 } catch {
-    fputs("\(error.localizedDescription)\n", stderr)
-    exit(1)
+    fputs("\(error)\n", stderr)
+    exit(EXIT_FAILURE)
 }
 
