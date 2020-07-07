@@ -3,5 +3,10 @@ osx_image: xcode11.4
 branches:
   only:
   - master
+install:
+  - ./install_swiftlint.sh
+  - ./install_swiftformat.sh
 script:
-- set -o pipefail && swift test
+  - swiftlint lint --quiet
+  - swiftformat --lint .
+  - set -o pipefail && swift test

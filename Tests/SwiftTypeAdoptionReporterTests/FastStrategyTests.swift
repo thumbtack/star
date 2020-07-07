@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+@testable import SwiftTypeAdoptionReporter
 import TSCBasic
 import XCTest
-@testable import SwiftTypeAdoptionReporter
 
 final class SwiftTypeAdoptionReporterTests: XCTestCase {
     /// *Do* count calls to constructors
@@ -194,7 +194,7 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
     func testNamespacedFunctionCallInNonModule() {
         let sourceString = "let _ = NotMyModule.Foo()"
         let expected: [String: Int] = ["Foo": 0]
-        let moduleName =  "MyModule"
+        let moduleName = "MyModule"
         verify(expected: expected, for: sourceString, moduleName: moduleName)
     }
 
@@ -228,7 +228,7 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
     func testNamespacedPropertyReferenceInNonModule() {
         let sourceString = "let _ = NotMyModule.Foo.bar"
         let expected: [String: Int] = ["Foo": 0]
-        let moduleName =  "MyModule"
+        let moduleName = "MyModule"
         verify(expected: expected, for: sourceString, moduleName: moduleName)
     }
 
@@ -314,11 +314,16 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
                         file: StaticString = #file,
                         line: UInt = #line) {
         let types = types ?? expected.map({ key, _ in key })
-        assert(!types.isEmpty, "If `expected` is an empty dictionary, a list of component identifiers to search for must be passed explicitly in the `types` argument. Otherwise the test won't really be testing anything.", file: file, line: line)
+        assert(!types.isEmpty, "If `expected` is an empty dictionary, a list of component identifiers to search for must be passed explicitly in the `types` argument. Otherwise the test won't really be testing anything.", file: file, line: line) // swiftlint:disable:this line_length
 
         do {
             try withTemporaryFile { tmpFile in
-                tmpFile.fileHandle.write(sourceString.data(using: .utf8)!)
+                guard let sourceData = sourceString.data(using: .utf8) else {
+                    XCTFail("Failed to encode source string as UTF8 data")
+                    return
+                }
+
+                tmpFile.fileHandle.write(sourceData)
 
                 let strategy = FastStrategy(
                     types: types,

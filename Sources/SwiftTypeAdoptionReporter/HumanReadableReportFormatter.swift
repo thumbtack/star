@@ -13,8 +13,7 @@
 // limitations under the License.
 
 public class HumanReadableReportFormatter: ReportFormatter {
-    public init() {
-    }
+    public init() {}
 
     public func format(_ usageCounts: [String: TypeUsage]) -> String {
         let sortedUsageCounts = usageCounts.sorted(by: { $0.key < $1.key })

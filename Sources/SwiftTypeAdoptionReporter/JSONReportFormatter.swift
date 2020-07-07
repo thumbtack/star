@@ -21,8 +21,7 @@ private struct EncodableTypeUsage: Encodable {
 }
 
 public class JSONReportFormatter: ReportFormatter {
-    public init() {
-    }
+    public init() {}
 
     public func format(_ usageCounts: [String: TypeUsage]) -> String {
         let encodableTypeUsages = usageCounts.map({ name, typeUsage in
