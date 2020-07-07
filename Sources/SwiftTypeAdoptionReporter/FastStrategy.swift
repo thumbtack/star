@@ -57,8 +57,15 @@ public class FastStrategy: SyntaxVisitor, Strategy {
         return typeUsages
     }
 
-    enum Error: Swift.Error {
-        case noSuchFileOrDirectory
+    enum Error: Swift.Error, CustomStringConvertible {
+        case noSuchFileOrDirectory(URL)
+
+        var description: String {
+            switch self {
+            case let .noSuchFileOrDirectory(url):
+                return "No such file or directory: \(url.path)"
+            }
+        }
     }
 
     // MARK: - SyntaxVisitor
@@ -234,7 +241,7 @@ public class FastStrategy: SyntaxVisitor, Strategy {
     private func visit(fileOrDirectory: AbsolutePath) throws {
         let isDirectoryPointer = UnsafeMutablePointer<ObjCBool>.allocate(capacity: 1)
         guard FileManager.default.fileExists(atPath: fileOrDirectory.pathString, isDirectory: isDirectoryPointer) else {
-            throw Error.noSuchFileOrDirectory
+            throw Error.noSuchFileOrDirectory(fileOrDirectory.asURL)
         }
 
         if isDirectoryPointer.pointee.boolValue {
@@ -267,7 +274,7 @@ public class FastStrategy: SyntaxVisitor, Strategy {
      */
     private func visit(file: AbsolutePath) throws {
         guard FileManager.default.fileExists(atPath: file.pathString) else {
-            throw Error.noSuchFileOrDirectory
+            throw Error.noSuchFileOrDirectory(file.asURL)
         }
 
         currentFile = file
