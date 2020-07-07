@@ -37,6 +37,12 @@ let moduleNameArgument = argumentParser.add(
     usage: "Name of module containing types, to ensure types referenced by <module name>.<type name> are counted"
 )
 
+let includeTypeInheritanceArgument = argumentParser.add(
+    option: "--includeTypeInheritance",
+    kind: Bool.self,
+    usage: "If true, include subclass and protocol conformance declarations in usage counts"
+)
+
 let formatArgument = argumentParser.add(
     option: "--format",
     shortName: "-f",
@@ -69,6 +75,7 @@ do {
     }
 
     let moduleName = parsedArguments.get(moduleNameArgument)
+    let includeTypeInheritance = parsedArguments.get(includeTypeInheritanceArgument) ?? false
     let verbose = parsedArguments.get(verboseArgument) ?? false
 
     guard let paths = parsedArguments.get(pathsArgument) else {
@@ -82,6 +89,7 @@ do {
         paths: paths.map({ $0.path }),
         verbose: verbose
     )
+    strategy.includeTypeInheritance = includeTypeInheritance
 
     let formatter: ReportFormatter
     switch parsedArguments.get(formatArgument) {

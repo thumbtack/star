@@ -67,6 +67,53 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
         verify(expected: expected, for: sourceString)
     }
 
+    /// *Do* count subclasses if includeTypeInheritance is true
+    func testDeclareSubclassIncludeTypeInheritance() {
+        let sourceString =
+            """
+            class MyView: UIView {
+            }
+            """
+        let expected: [String: Int] = ["UIView": 1]
+        verify(
+            expected: expected,
+            for: sourceString,
+            setUp: {
+                $0.includeTypeInheritance = true
+            }
+        )
+    }
+
+    /// *Do not* count protocol conformance
+    func testProtocolConformance() {
+        let sourceString =
+            """
+            protocol MyProtocol {}
+            class Foo: UIView, MyProtocol {}
+            class Bar: MyProtocol {}
+            """
+        let expected = ["MyProtocol": 0]
+        verify(expected: expected, for: sourceString)
+    }
+
+    /// *Do* count protocol conformance if includeTypeInheritance is true
+    func testProtocolConformanceIncludeTypeInheritance() {
+        let sourceString =
+            """
+            protocol MyProtocol {}
+            class Foo: UIView, MyProtocol {}
+            class Bar: MyProtocol {}
+            """
+        let expected = ["MyProtocol": 2]
+        verify(
+            expected: expected,
+            for: sourceString,
+            setUp: {
+                $0.includeTypeInheritance = true
+            }
+        )
+    }
+
     /// *Do not* count declaration of the component itself
     func testDeclareSameNameClass() {
         let sourceString =
@@ -263,6 +310,7 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
                         types: [String]? = nil,
                         for sourceString: String,
                         moduleName: String? = nil,
+                        setUp: ((FastStrategy) -> Void)? = nil,
                         file: StaticString = #file,
                         line: UInt = #line) {
         let types = types ?? expected.map({ key, _ in key })
@@ -277,6 +325,8 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
                     moduleName: moduleName,
                     paths: [tmpFile.path]
                 )
+
+                setUp?(strategy)
 
                 let actual = (try strategy.findUsageCounts()).mapValues({ $0.usageCount })
                 XCTAssertEqual(expected, actual, file: file, line: line)
