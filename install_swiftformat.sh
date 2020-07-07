@@ -1,15 +1,14 @@
 #!/bin/bash
 
 # Installs the SwiftFormat package.
-# Tries to get the precompiled .pkg file from Github, but if that
-# fails just recompiles from source.
+# Tries to install from Homebrew, but if that fails just recompiles from source.
 
 set -e
 
 brew update && brew install swiftformat
 
 if ! type swiftformat > /dev/null 2>&1; then
-    echo "SwiftFormat package doesn't exist. Compiling from source..." &&
+    echo "Failed to install SwiftFormat from Homebrew. Compiling from source..." &&
     swiftformat_repo_path=$(mktemp) &&
     git clone https://github.com/nicklockwood/SwiftFormat.git $swiftformat_repo_path &&
     cd $swiftformat_repo_path &&
