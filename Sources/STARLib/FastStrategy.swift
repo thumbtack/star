@@ -14,14 +14,13 @@
 
 import Foundation
 import SwiftSyntax
-import TSCBasic
 
 public class FastStrategy: SyntaxVisitor, Strategy {
     public var includeTypeInheritance: Bool = false
 
     public init(types: [String],
                 moduleName: String?,
-                paths: [AbsolutePath],
+                paths: [URL],
                 verbose: Bool = false) {
         self.types = types
         self.moduleName = moduleName
@@ -51,7 +50,7 @@ public class FastStrategy: SyntaxVisitor, Strategy {
 
                 print("\(type) used in the following files:")
                 files
-                    .map({ " \($0.pathString)" })
+                    .map({ " \($0.path)" })
                     .forEach { print($0) }
             }
         }
@@ -255,32 +254,31 @@ public class FastStrategy: SyntaxVisitor, Strategy {
     // MARK: - Private
     private let types: [String]
     private let moduleName: String?
-    private let paths: [AbsolutePath]
+    private let paths: [URL]
     private let verbose: Bool
-    private var fileCounts: [String: Set<AbsolutePath>] = [:]
+    private var fileCounts: [String: Set<URL>] = [:]
     private var usageCounts: [String: Int] = [:]
-    private var currentFile: AbsolutePath?
+    private var currentFile: URL?
 
     /**
      * - Parameters:
      *   - fileOrDirectory: Path of file/directory to parse.
      *   - reporter: Reporter in which to store report.
      */
-    private func visit(fileOrDirectory: AbsolutePath) throws {
+    private func visit(fileOrDirectory: URL) throws {
         let isDirectoryPointer = UnsafeMutablePointer<ObjCBool>.allocate(capacity: 1)
-        guard FileManager.default.fileExists(atPath: fileOrDirectory.pathString, isDirectory: isDirectoryPointer) else {
-            throw Error.noSuchFileOrDirectory(fileOrDirectory.asURL)
+        guard FileManager.default.fileExists(atPath: fileOrDirectory.path, isDirectory: isDirectoryPointer) else {
+            throw Error.noSuchFileOrDirectory(fileOrDirectory)
         }
 
         if isDirectoryPointer.pointee.boolValue {
             let directory = fileOrDirectory
-            let directoryPath = directory.pathString
 
-            let fileEnumerator = FileManager.default.enumerator(atPath: directoryPath)
+            let fileEnumerator = FileManager.default.enumerator(atPath: directory.path)
             while let fileName = fileEnumerator?.nextObject() as? String {
-                let file = directory.appending(RelativePath(fileName))
+                let file = directory.appendingPathComponent(fileName, isDirectory: false)
 
-                if !FileManager.default.fileExists(atPath: file.pathString, isDirectory: isDirectoryPointer) || isDirectoryPointer.pointee.boolValue {
+                if !FileManager.default.fileExists(atPath: file.path, isDirectory: isDirectoryPointer) || isDirectoryPointer.pointee.boolValue {
                     // Files inside subdirectories will already be included in fileEnumerator.
                     // Recursively calling visit(fileOrDirectory:with:) on them here would result
                     // in duplicated counts.
@@ -300,14 +298,14 @@ public class FastStrategy: SyntaxVisitor, Strategy {
      *   - file: Path of file to parse.
      *   - reporter: Reporter in which to store report.
      */
-    private func visit(file: AbsolutePath) throws {
-        guard FileManager.default.fileExists(atPath: file.pathString) else {
-            throw Error.noSuchFileOrDirectory(file.asURL)
+    private func visit(file: URL) throws {
+        guard FileManager.default.fileExists(atPath: file.path) else {
+            throw Error.noSuchFileOrDirectory(file)
         }
 
         currentFile = file
 
-        let parsedSource = try SyntaxParser.parse(file.asURL)
+        let parsedSource = try SyntaxParser.parse(file)
         walk(parsedSource)
     }
 

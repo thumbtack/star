@@ -13,7 +13,6 @@
 // limitations under the License.
 
 @testable import STARLib
-import TSCBasic
 import XCTest
 
 final class SwiftTypeAdoptionReporterTests: XCTestCase {
@@ -317,25 +316,20 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
         assert(!types.isEmpty, "If `expected` is an empty dictionary, a list of component identifiers to search for must be passed explicitly in the `types` argument. Otherwise the test won't really be testing anything.", file: file, line: line) // swiftlint:disable:this line_length
 
         do {
-            try withTemporaryFile { tmpFile in
-                guard let sourceData = sourceString.data(using: .utf8) else {
-                    XCTFail("Failed to encode source string as UTF8 data")
-                    return
-                }
+            let temporaryDirectory = FileManager.default.temporaryDirectory
+            let temporaryFile = temporaryDirectory.appendingPathComponent(ProcessInfo().globallyUniqueString, isDirectory: false)
+            try sourceString.write(to: temporaryFile, atomically: false, encoding: .utf8)
 
-                tmpFile.fileHandle.write(sourceData)
+            let strategy = FastStrategy(
+                types: types,
+                moduleName: moduleName,
+                paths: [temporaryFile]
+            )
 
-                let strategy = FastStrategy(
-                    types: types,
-                    moduleName: moduleName,
-                    paths: [tmpFile.path]
-                )
+            setUp?(strategy)
 
-                setUp?(strategy)
-
-                let actual = (try strategy.findUsageCounts()).mapValues({ $0.usageCount })
-                XCTAssertEqual(expected, actual, file: file, line: line)
-            }
+            let actual = (try strategy.findUsageCounts()).mapValues({ $0.usageCount })
+            XCTAssertEqual(expected, actual, file: file, line: line)
         } catch {
             XCTFail("Failed with error \(String(describing: error))", file: file, line: line)
         }
