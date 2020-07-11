@@ -18,7 +18,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Swift Type Adoption Reporter (STAR)",
+    name: "SwiftTypeAdoptionReporter",
     products: [
         .executable(
             name: "star",
@@ -32,7 +32,7 @@ let package = Package(
             targets: [
                 "SwiftTypeAdoptionReporter",
             ]
-        )
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
