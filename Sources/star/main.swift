@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Foundation
-import SwiftTypeAdoptionReporter
+import STARLib
 import TSCUtility
 
 // MARK: - Arguments
