@@ -23,14 +23,14 @@ let package = Package(
         .executable(
             name: "star",
             targets: [
-                "swift-type-adoption-reporter",
+                "star",
             ]
         ),
         .library(
-            name: "STAR",
+            name: "STARLib",
             type: .static,
             targets: [
-                "SwiftTypeAdoptionReporter",
+                "STARLib",
             ]
         ),
     ],
@@ -39,19 +39,17 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-syntax.git", from: "0.50200.0"),
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
-            name: "swift-type-adoption-reporter",
-            dependencies: ["SwiftTypeAdoptionReporter"]
+            name: "star",
+            dependencies: ["STARLib"]
         ),
         .target(
-            name: "SwiftTypeAdoptionReporter",
+            name: "STARLib",
             dependencies: ["SwiftSyntax", "SwiftPM"]
         ),
         .testTarget(
-            name: "SwiftTypeAdoptionReporterTests",
-            dependencies: ["SwiftTypeAdoptionReporter"]
+            name: "STARLibTests",
+            dependencies: ["STARLib"]
         ),
     ]
 )
