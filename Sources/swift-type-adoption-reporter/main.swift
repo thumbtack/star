@@ -18,7 +18,7 @@ import TSCUtility
 
 // MARK: - Arguments
 let argumentParser = ArgumentParser(
-    commandName: "swift-type-adoption-reporter",
+    commandName: "star",
     usage: "--types <types> --files <files> [--module <module name>] [--verbose]",
     overview: "Print how frequently each type has been used."
 )

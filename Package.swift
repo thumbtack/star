@@ -19,6 +19,21 @@ import PackageDescription
 
 let package = Package(
     name: "SwiftTypeAdoptionReporter",
+    products: [
+        .executable(
+            name: "star",
+            targets: [
+                "swift-type-adoption-reporter",
+            ]
+        ),
+        .library(
+            name: "STAR",
+            type: .static,
+            targets: [
+                "SwiftTypeAdoptionReporter",
+            ]
+        ),
+    ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
         .package(url: "https://github.com/apple/swift-syntax.git", from: "0.50200.0"),

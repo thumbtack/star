@@ -16,6 +16,7 @@ all: swift-type-adoption-reporter
 
 swift-type-adoption-reporter: $(SOURCES)
 	@swift build \
+		--product star \
 		-c release \
 		--disable-sandbox \
 		--build-path "$(BUILDDIR)"
@@ -23,19 +24,17 @@ swift-type-adoption-reporter: $(SOURCES)
 .PHONY: install
 install: swift-type-adoption-reporter
 	@install -d "$(bindir)" "$(libdir)"
-	@install "$(BUILDDIR)/release/swift-type-adoption-reporter" "$(bindir)"
+	@install "$(BUILDDIR)/release/star" "$(bindir)"
 	@install "$(BUILDDIR)/release/SwiftSyntax.swiftmodule" "$(libdir)"
 	@install "$(BUILDDIR)/release/libSwiftPM.dylib" "$(libdir)"
 	@install_name_tool -change \
 		"$(BUILDDIR)/x86_64-apple-macosx/release/SwiftSyntax.swiftmodule" \
 		"$(libdir)/SwiftSyntax.swiftmodule" \
-		"$(bindir)/swift-type-adoption-reporter"
-	@if [ ! -e  "$(bindir)/star" ]; then ln -s "$(bindir)/swift-type-adoption-reporter" "$(bindir)/star"; fi
+		"$(bindir)/star"
 
 .PHONY: uninstall
 uninstall:
 	@rm -rf "$(bindir)/star"
-	@rm -rf "$(bindir)/swift-type-adoption-reporter"
 	@rm -rf "$(libdir)/SwiftSyntax.swiftmodule"
 
 .PHONY: clean
