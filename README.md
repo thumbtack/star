@@ -1,8 +1,8 @@
 [![Build Status](https://badgen.net/travis/thumbtack/star)](https://travis-ci.com/thumbtack/star)
 [![License](https://badgen.net/github/license/thumbtack/star)](https://github.com/thumbtack/star/blob/master/LICENSE)
-[![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-orange.svg)](https://swift.org/package-manager/)
+[![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-orange.svg)](https://swiftpackageindex.com/thumbtack/star)
 
-# STAR: Swift Type Adoption Reporter
+# Swift Type Adoption Reporter (STAR)
 
 Generate reports on how frequently specified Swift types are being used in your iOS codebase with a simple command-line interface.
 
@@ -16,7 +16,7 @@ $ make install
 ## Usage
 
 ```
-$ star --components Avatar Button Color Pill --files ./
+$ star --types Avatar Button Color Pill --files ./
 
 Avatar used 27 times.
 Button used 167 times.
@@ -24,10 +24,10 @@ Color used 2711 times.
 Pill used 9 times.
 ```
 
-To report on components which are in a separate module, specify a `--moduleName`. This will ensure that  references like `Thumbprint.Button()` are captured too.
+To report on types which are in a separate module, specify a `--moduleName`. This will ensure that  references like `Thumbprint.Button()` are captured too.
 
 ```
-$ star --components Avatar Button Color Pill --files ./ --moduleName Thumbprint
+$ star --types Avatar Button Color Pill --files ./ --module Thumbprint
 
 Avatar used 30 times.
 Button used 182 times.
@@ -35,25 +35,26 @@ Color used 2786 times.
 Pill used 11 times.
 ```
 
-Note: `star` is a symlink to `swift-type-adoption-reporter` for convenience. Use whichever name you prefer; they are identical.
-
 ### Options
 
 ```
-USAGE: star --components <components> --files <files> [--module <module name>] [--verbose]
+USAGE: star [--types <types> ...] [--module <module>] [--format <format>] [--files <files> ...] [--includeTypeInheritance] [--verbose]
 
 OPTIONS:
-  --components, -c   List of components on which to report
-  --files, -f        Paths in which to look for Swift source
-  --module, -m       Name of module containing components, to ensure members referenced by <module name>.<component name> are counted
-  --verbose, -v      If true, print additional information about source as it is parsed
-  --help, -h         Display available options
+  -t, --types <types>     List of types on which to report
+  -m, --module <module>   Name of module containing types, to ensure types referenced by <module name>.<type name> are counted
+  -f, --format <format>   Output format (humanReadable|json) (default: humanReadable)
+  --files <files>         Paths in which to look for Swift source
+  --includeTypeInheritance
+                          Include subclass and protocol conformance declarations in usage counts
+  -v, --verbose           Print additional information about source as it is parsed
+  -h, --help              Show help information.
 ```
 
 ## How it Works
 
 STAR uses [SwiftSyntax](https://github.com/apple/swift-syntax) to traverse the AST and find references to the specified identifiers.
-Since type information is not available at the AST level, usage reports may contain imperfect information when linking a reference to its identifier would require full type checking.
+Since STAR operates on the untyped AST, usage reports may contain imperfect information when linking a reference to its identifier would require full type checking.
 
 The reporter attempts to provide as useful information as possible, so some types of references are intentionally filtered out. For example, the line of code
 ```
@@ -70,6 +71,28 @@ $ cd star
 $ make uninstall
 ```
 
+## Importing into another Swift package
+
+In addition to the command-line executable `star`, STAR's core functionality is also available through Swift Package Manager as the static library `STARLib`. To use `STARLib` in your Swift package, add the following to your Package.swift:
+```
+let package = Package(
+    ...
+    dependencies: [
+        ...
+        .package(name: "SwiftTypeAdoptionReporter", url: "https://github.com/thumbtack/star.git", <version (e.g., `.upToNextMinor(from: "3.0.0")`)>),
+    ],
+    targets: [
+        .target(
+            ...
+            dependencies: [
+                ...
+                .product(name: "STARLib", package: "SwiftTypeAdoptionReporter"),
+            ]
+        ),
+    ]
+)
+```
+
 ## Contributing
 
 If you have ideas to make STAR more useful, open an issue or submit a pull request! See below for instructions on building/testing locally.
@@ -82,7 +105,7 @@ $ open -a Xcode .
 
 ### To build & run locally:
 ```
-$ swift run swift-type-adoption-reporter ...
+$ swift run star ...
 ```
 
 Passing in the `--verbose` argument will print out additional information which can be useful for debugging.
@@ -100,5 +123,5 @@ $ swift test
     ```
     $ swift package generate-xcodeproj
     ```
-2. Open `STAR.xcodeproj`
+2. Open `SwiftTypeAdoptionReporter.xcodeproj`
 3. In Xcode, **Product -> Test**
