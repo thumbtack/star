@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-public struct TypeUsage {
-    /// Number of files this type was used in
-    let fileCount: Int
+/// Enum representing syntax conditions in which STAR may count a type.
+public enum SyntaxType: String, CaseIterable {
+    /// E.g., count `UIView()` towards UIView
+    case constructorCall
 
-    /// Number of times this type was used
-    let usageCount: Int
-}
+    /// E.g., count `UIDevice.current` towards UIDevice
+    case staticPropertyReference
 
-public protocol Strategy: AnyObject {
-    /// A set of syntax types that the strategy should include in its usage counts.
-    var includeSyntax: Set<SyntaxType> { get set }
-
-    func findUsageCounts() throws -> [String: TypeUsage]
+    /// E.g., count `class Foo: UIView` towards UIView
+    /// (includes both subclassing and protocol conformance)
+    case typeInheritance
 }

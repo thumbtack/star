@@ -16,11 +16,20 @@
 import XCTest
 
 final class SwiftTypeAdoptionReporterTests: XCTestCase {
-    /// *Do* count calls to constructors
+    /// *Do* count calls to constructors iff .constructorCall included
     func testInitVar() {
         let sourceString = "let myView = UIView()"
-        let expected = ["UIView": 1]
-        verify(expected: expected, for: sourceString)
+        verify(
+            expected: ["UIView": 1],
+            for: sourceString
+        )
+        verify(
+            expected: ["UIView": 0],
+            for: sourceString,
+            setUp: {
+                $0.includeSyntax = $0.includeSyntax.subtracting([.constructorCall])
+            }
+        )
     }
 
     /// *Do not* count explicit type annotations on a variable
@@ -41,11 +50,20 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
         verify(expected: expected, for: sourceString)
     }
 
-    /// *Do* count calls to array-type constructors
+    /// *Do* count calls to array-type constructors iff .constructorCall included
     func testInitArrayTypeVar() {
         let sourceString = "let myViews = [UIView]()"
-        let expected = ["UIView": 1]
-        verify(expected: expected, for: sourceString)
+        verify(
+            expected: ["UIView": 1],
+            for: sourceString
+        )
+        verify(
+            expected: ["UIView": 0],
+            for: sourceString,
+            setUp: {
+                $0.includeSyntax = $0.includeSyntax.subtracting([.constructorCall])
+            }
+        )
     }
 
     /// *Do not* count explicit type annotations on an array-type variable
@@ -55,35 +73,27 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
         verify(expected: expected, for: sourceString)
     }
 
-    /// *Do not* count subclasses
+    /// *Do* count subclasses iff .typeInheritance included
     func testDeclareSubclass() {
         let sourceString =
             """
             class MyView: UIView {
             }
             """
-        let expected: [String: Int] = ["UIView": 0]
-        verify(expected: expected, for: sourceString)
-    }
-
-    /// *Do* count subclasses if includeTypeInheritance is true
-    func testDeclareSubclassIncludeTypeInheritance() {
-        let sourceString =
-            """
-            class MyView: UIView {
-            }
-            """
-        let expected: [String: Int] = ["UIView": 1]
         verify(
-            expected: expected,
+            expected: ["UIView": 1],
+            for: sourceString
+        )
+        verify(
+            expected: ["UIView": 0],
             for: sourceString,
             setUp: {
-                $0.includeTypeInheritance = true
+                $0.includeSyntax = $0.includeSyntax.subtracting([.typeInheritance])
             }
         )
     }
 
-    /// *Do not* count protocol conformance
+    /// *Do* count protocol conformance iff .typeInheritance is included
     func testProtocolConformance() {
         let sourceString =
             """
@@ -91,24 +101,15 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
             class Foo: UIView, MyProtocol {}
             class Bar: MyProtocol {}
             """
-        let expected = ["MyProtocol": 0]
-        verify(expected: expected, for: sourceString)
-    }
-
-    /// *Do* count protocol conformance if includeTypeInheritance is true
-    func testProtocolConformanceIncludeTypeInheritance() {
-        let sourceString =
-            """
-            protocol MyProtocol {}
-            class Foo: UIView, MyProtocol {}
-            class Bar: MyProtocol {}
-            """
-        let expected = ["MyProtocol": 2]
         verify(
-            expected: expected,
+            expected: ["MyProtocol": 2],
+            for: sourceString
+        )
+        verify(
+            expected: ["MyProtocol": 0],
             for: sourceString,
             setUp: {
-                $0.includeTypeInheritance = true
+                $0.includeSyntax = $0.includeSyntax.subtracting([.typeInheritance])
             }
         )
     }
@@ -144,10 +145,17 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
                 let _ = UILabel()
             }
             """
-        let expected = [
-            "UILabel": 1,
-        ]
-        verify(expected: expected, for: sourceString)
+        verify(
+            expected: ["UILabel": 1],
+            for: sourceString
+        )
+        verify(
+            expected: ["UILabel": 0],
+            for: sourceString,
+            setUp: {
+                $0.includeSyntax = $0.includeSyntax.subtracting([.constructorCall])
+            }
+        )
     }
 
     /// *Do not* count declaraction of the component itself
@@ -172,17 +180,26 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
         verify(expected: expected, for: sourceString)
     }
 
-    /// *Do* count function calls relative to a provided module name
-    func testFunctionCallWithModuleName() {
+    /// *Do* count constructor calls relative to a provided module name iff .constructorCall included
+    func testConstructorCallWithModuleName() {
         let sourceString = "let _ = MyModule.Foo()"
-        let expected = [
-            "Foo": 1,
-        ]
         let moduleName = "MyModule"
-        verify(expected: expected, for: sourceString, moduleName: moduleName)
+        verify(
+            expected: ["Foo": 1],
+            for: sourceString,
+            moduleName: moduleName
+        )
+        verify(
+            expected: ["Foo": 0],
+            for: sourceString,
+            moduleName: moduleName,
+            setUp: {
+                $0.includeSyntax = $0.includeSyntax.subtracting([.constructorCall])
+            }
+        )
     }
 
-    /// *Do not* count function calls relative to a containing module/class if no module name provided
+    /// *Do not* count constructor calls relative to a containing module/class if no module name provided
     func testNamespacedFunctionCallWithoutModuleName() {
         let sourceString = "let _ = Foo.Bar()"
         let expected: [String: Int] = ["Bar": 0]
@@ -197,23 +214,39 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
         verify(expected: expected, for: sourceString, moduleName: moduleName)
     }
 
-    /// *Do* count property references relative to a provided module name
+    /// *Do* count property references relative to a provided module name iff .staticPropertyReference included
     func testPropertyReferenceWithModuleName() {
         let sourceString = "let _ = MyModule.Foo.bar"
-        let expected = [
-            "Foo": 1,
-        ]
         let moduleName = "MyModule"
-        verify(expected: expected, for: sourceString, moduleName: moduleName)
+        verify(
+            expected: ["Foo": 1],
+            for: sourceString,
+            moduleName: moduleName
+        )
+        verify(
+            expected: ["Foo": 0],
+            for: sourceString,
+            moduleName: moduleName,
+            setUp: {
+                $0.includeSyntax = $0.includeSyntax.subtracting([.staticPropertyReference])
+            }
+        )
     }
 
-    /// *Do* count property references with no module name
+    /// *Do* count property references with no module name iff .staticPropertyReference included
     func testPropertyReference() {
         let sourceString = "let _ = Foo.bar"
-        let expected = [
-            "Foo": 1,
-        ]
-        verify(expected: expected, for: sourceString)
+        verify(
+            expected: ["Foo": 1],
+            for: sourceString
+        )
+        verify(
+            expected: ["Foo": 0],
+            for: sourceString,
+            setUp: {
+                $0.includeSyntax = $0.includeSyntax.subtracting([.staticPropertyReference])
+            }
+        )
     }
 
     /// *Do not* count property references relative to a containing module/class if no module name provided
@@ -242,10 +275,17 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
     /// *Do* count references inside another function call
     func testFunctionArgument() {
         let sourceString = "Foo(child: Foo())"
-        let expected = [
-            "Foo": 2,
-        ]
-        verify(expected: expected, for: sourceString)
+        verify(
+            expected: ["Foo": 2],
+            for: sourceString
+        )
+        verify(
+            expected: ["Foo": 0],
+            for: sourceString,
+            setUp: {
+                $0.includeSyntax = $0.includeSyntax.subtracting([.constructorCall])
+            }
+        )
     }
 
     /// *Do not* count contents of a comment
@@ -265,8 +305,17 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
     /// *Do* count references in string interpolation
     func testStringInterpolation() {
         let sourceString = "\"\\(UIView())\""
-        let expected = ["UIView": 1]
-        verify(expected: expected, for: sourceString)
+        verify(
+            expected: ["UIView": 1],
+            for: sourceString
+        )
+        verify(
+            expected: ["UIView": 0],
+            for: sourceString,
+            setUp: {
+                $0.includeSyntax = $0.includeSyntax.subtracting([.constructorCall])
+            }
+        )
     }
 
     /// *Do not* count type casting
@@ -293,15 +342,33 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
     /// *Do* count function calls that are arguments to a chained function call
     func testFunctionCallArgumentInChainedFunctionCall() {
         let sourceString = "foo.bar(UIView()).buzz(UIView()).baz(UIView())"
-        let expected = ["UIView": 3]
-        verify(expected: expected, for: sourceString)
+        verify(
+            expected: ["UIView": 3],
+            for: sourceString
+        )
+        verify(
+            expected: ["UIView": 0],
+            for: sourceString,
+            setUp: {
+                $0.includeSyntax = $0.includeSyntax.subtracting([.constructorCall])
+            }
+        )
     }
 
-    /// *Do* count property references that are arguments to a chained function call
+    /// *Do* count property references that are arguments to a chained function call iff .staticPropertyReference included
     func testPropertyReferenceArgumentInChainedFunctionCall() {
         let sourceString = "foo.bar(UIView.someProp).buzz(UIView.someProp).baz(UIView.someProp)"
-        let expected = ["UIView": 3]
-        verify(expected: expected, for: sourceString)
+        verify(
+            expected: ["UIView": 3],
+            for: sourceString
+        )
+        verify(
+            expected: ["UIView": 0],
+            for: sourceString,
+            setUp: {
+                $0.includeSyntax = $0.includeSyntax.subtracting([.staticPropertyReference])
+            }
+        )
     }
 
     // MARK: - Private
@@ -324,6 +391,7 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
             let strategy = FastStrategy(
                 types: types,
                 moduleName: moduleName,
+                includeSyntax: Set(SyntaxType.allCases),
                 paths: [temporaryFile]
             )
 

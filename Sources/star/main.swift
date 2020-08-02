@@ -36,6 +36,15 @@ struct MainCommand: ParsableCommand {
     var moduleName: String?
 
     @Option(
+        name: [.customLong("include-syntax")],
+        help: "Syntax conditions to include in usage counts (constructorCall, staticPropertyReference, typeInheritance)"
+    )
+    var includeSyntax: [SyntaxType] = [
+        .constructorCall,
+        .staticPropertyReference,
+    ]
+
+    @Option(
         name: .shortAndLong,
         help: "Output format (humanReadable|json)"
     )
@@ -47,12 +56,6 @@ struct MainCommand: ParsableCommand {
         help: "Paths in which to look for Swift source"
     )
     var files: [URL] = []
-
-    @Flag(
-        name: .customLong("includeTypeInheritance"),
-        help: "Include subclass and protocol conformance declarations in usage counts"
-    )
-    var includeTypeInheritance: Bool = false
 
     @Flag(
         name: .shortAndLong,
@@ -72,10 +75,10 @@ struct MainCommand: ParsableCommand {
         let strategy = FastStrategy(
             types: types,
             moduleName: moduleName,
+            includeSyntax: Set(includeSyntax),
             paths: files,
             verbose: verbose
         )
-        strategy.includeTypeInheritance = includeTypeInheritance
 
         let formatter = format.makeFormatter()
 

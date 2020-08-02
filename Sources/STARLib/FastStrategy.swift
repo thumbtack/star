@@ -16,15 +16,17 @@ import Foundation
 import SwiftSyntax
 
 public class FastStrategy: SyntaxVisitor, Strategy {
-    public var includeTypeInheritance: Bool = false
+    public var includeSyntax: Set<SyntaxType>
 
     public init(types: [String],
                 moduleName: String?,
+                includeSyntax: Set<SyntaxType>,
                 paths: [URL],
                 verbose: Bool = false)
     {
         self.types = types
         self.moduleName = moduleName
+        self.includeSyntax = includeSyntax
         self.paths = paths
         self.verbose = verbose
     }
@@ -72,13 +74,13 @@ public class FastStrategy: SyntaxVisitor, Strategy {
 
     // MARK: - SyntaxVisitor
     override public func visit(_ token: TokenSyntax) -> SyntaxVisitorContinueKind {
-        switch token.tokenKind {
-        case let .identifier(identifier) where types.contains(identifier):
+        if includeSyntax.contains(.constructorCall),
+            case let .identifier(identifier) = token.tokenKind,
+            types.contains(identifier) {
             increment(identifier, token: token)
-            return .skipChildren
-        default:
-            return .skipChildren
         }
+
+        return .skipChildren
     }
 
     override public func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
@@ -86,12 +88,14 @@ public class FastStrategy: SyntaxVisitor, Strategy {
 
         if let baseIdentifierExpr = base.as(IdentifierExprSyntax.self) {
             if case let .identifier(baseIdentifier) = baseIdentifierExpr.identifier.tokenKind {
-                if types.contains(baseIdentifier) {
+                if includeSyntax.contains(.staticPropertyReference),
+                    types.contains(baseIdentifier) {
                     increment(baseIdentifier, token: baseIdentifierExpr.identifier)
                     return .skipChildren
                 }
 
-                if let moduleName = moduleName,
+                if includeSyntax.contains(.constructorCall),
+                    let moduleName = moduleName,
                     baseIdentifier == moduleName,
                     case let .identifier(identifier) = node.name.tokenKind,
                     types.contains(identifier)
@@ -104,7 +108,8 @@ public class FastStrategy: SyntaxVisitor, Strategy {
             return .skipChildren
 
         } else if let baseMemberAccessExpr = base.as(MemberAccessExprSyntax.self) {
-            if let moduleName = moduleName,
+            if includeSyntax.contains(.staticPropertyReference),
+                let moduleName = moduleName,
                 let innerBaseIdentifierExpr = baseMemberAccessExpr.base?.as(IdentifierExprSyntax.self),
                 case let .identifier(innerBaseIdentifier) = innerBaseIdentifierExpr.identifier.tokenKind,
                 innerBaseIdentifier == moduleName,
@@ -219,7 +224,7 @@ public class FastStrategy: SyntaxVisitor, Strategy {
     }
 
     override public func visit(_ node: TypeInheritanceClauseSyntax) -> SyntaxVisitorContinueKind {
-        if includeTypeInheritance {
+        if includeSyntax.contains(.typeInheritance) {
             for inheritedType in node.inheritedTypeCollection {
                 guard let typeIdentifier = inheritedType.typeName.as(SimpleTypeIdentifierSyntax.self) else { continue }
 
@@ -231,11 +236,9 @@ public class FastStrategy: SyntaxVisitor, Strategy {
                     break
                 }
             }
-
-            return .skipChildren
-        } else {
-            return .skipChildren
         }
+
+        return .skipChildren
     }
 
     override public func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
