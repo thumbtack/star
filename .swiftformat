@@ -25,6 +25,7 @@
 --enable leadingDelimiters
 --enable linebreakAtEndOfFile
 --enable linebreaks
+--enable modifierOrder
 --enable redundantBackticks
 --enable redundantBreak
 --enable redundantExtensionACL
@@ -51,7 +52,6 @@
 --enable spaceInsideComments
 --enable spaceInsideGenerics
 --enable spaceInsideParens
---enable specifiers
 --enable strongifiedSelf
 --enable todos
 --enable trailingCommas
