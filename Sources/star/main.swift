@@ -43,6 +43,7 @@ struct MainCommand: ParsableCommand {
 
     @Option(
         name: .long,
+        parsing: .upToNextOption,
         help: "Paths in which to look for Swift source"
     )
     var files: [URL] = []
