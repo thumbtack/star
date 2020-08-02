@@ -12,17 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-public struct TypeUsage {
-    /// Number of files this type was used in
-    let fileCount: Int
+import ArgumentParser
+import STARLib
 
-    /// Number of times this type was used
-    let usageCount: Int
-}
-
-public protocol Strategy: AnyObject {
-    /// A set of syntax types that the strategy should include in its usage counts.
-    var includeSyntax: Set<SyntaxType> { get set }
-
-    func findUsageCounts() throws -> [String: TypeUsage]
-}
+extension SyntaxType: ExpressibleByArgument {}
