@@ -372,14 +372,14 @@ final class SwiftTypeAdoptionReporterTests: XCTestCase {
     }
 
     // MARK: - Private
+
     private func verify(expected: [String: Int],
                         types: [String]? = nil,
                         for sourceString: String,
                         moduleName: String? = nil,
                         setUp: ((FastStrategy) -> Void)? = nil,
                         file: StaticString = #file,
-                        line: UInt = #line)
-    {
+                        line: UInt = #line) {
         let types = types ?? expected.map({ key, _ in key })
         assert(!types.isEmpty, "If `expected` is an empty dictionary, a list of component identifiers to search for must be passed explicitly in the `types` argument. Otherwise the test won't really be testing anything.", file: file, line: line) // swiftlint:disable:this line_length
 

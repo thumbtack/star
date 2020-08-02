@@ -1,6 +1,7 @@
 --disable fileHeader
 --disable isEmpty # Has the potential to auto-fix in a way that breaks the code
 --disable unusedArguments # We don't see enough value in the consistency this rule gives, and it could introduce conflicts in dependent PRs
+--disable wrapMultilineStatementBraces
 
 # These are potentially controversial.
 --disable blankLinesAroundMark # Is it a net improvement in code quality to enable this?
