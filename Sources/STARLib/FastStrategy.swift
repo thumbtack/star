@@ -21,7 +21,8 @@ public class FastStrategy: SyntaxVisitor, Strategy {
     public init(types: [String],
                 moduleName: String?,
                 paths: [URL],
-                verbose: Bool = false) {
+                verbose: Bool = false)
+    {
         self.types = types
         self.moduleName = moduleName
         self.paths = paths
@@ -93,7 +94,8 @@ public class FastStrategy: SyntaxVisitor, Strategy {
                 if let moduleName = moduleName,
                     baseIdentifier == moduleName,
                     case let .identifier(identifier) = node.name.tokenKind,
-                    types.contains(identifier) {
+                    types.contains(identifier)
+                {
                     increment(identifier, token: node.name)
                     return .skipChildren
                 }
@@ -107,7 +109,8 @@ public class FastStrategy: SyntaxVisitor, Strategy {
                 case let .identifier(innerBaseIdentifier) = innerBaseIdentifierExpr.identifier.tokenKind,
                 innerBaseIdentifier == moduleName,
                 case let .identifier(innerIdentifier) = baseMemberAccessExpr.name.tokenKind,
-                types.contains(innerIdentifier) {
+                types.contains(innerIdentifier)
+            {
                 increment(innerIdentifier, token: baseMemberAccessExpr.name)
                 return .skipChildren
             }

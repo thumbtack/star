@@ -25,17 +25,10 @@ swift-type-adoption-reporter: $(SOURCES)
 install: swift-type-adoption-reporter
 	@install -d "$(bindir)" "$(libdir)"
 	@install "$(BUILDDIR)/release/star" "$(bindir)"
-	@install "$(BUILDDIR)/release/SwiftSyntax.swiftmodule" "$(libdir)"
-	@install "$(BUILDDIR)/release/libSwiftPM.dylib" "$(libdir)"
-	@install_name_tool -change \
-		"$(BUILDDIR)/x86_64-apple-macosx/release/SwiftSyntax.swiftmodule" \
-		"$(libdir)/SwiftSyntax.swiftmodule" \
-		"$(bindir)/star"
 
 .PHONY: uninstall
 uninstall:
 	@rm -rf "$(bindir)/star"
-	@rm -rf "$(libdir)/SwiftSyntax.swiftmodule"
 
 .PHONY: clean
 distclean:
