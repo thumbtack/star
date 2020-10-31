@@ -194,31 +194,31 @@ public class FastStrategy: SyntaxVisitor, Strategy {
     }
 
     override public func visit(_: UnknownSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     override public func visit(_: InOutExprSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     override public func visit(_: AssignmentExprSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     override public func visit(_: TypeExprSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     override public func visit(_: TypeAnnotationSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     override public func visit(_: TypeInitializerClauseSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     override public func visit(_: TypealiasDeclSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     override public func visit(_ node: TypeInheritanceClauseSyntax) -> SyntaxVisitorContinueKind {
@@ -240,19 +240,19 @@ public class FastStrategy: SyntaxVisitor, Strategy {
     }
 
     override public func visit(_: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     override public func visit(_: FunctionSignatureSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     override public func visit(_: AsTypePatternSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     override public func visit(_: AsExprSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
+        .skipChildren
     }
 
     // MARK: - Private
