@@ -1,0 +1,27 @@
+name: CI
+on: push
+jobs:
+  test:
+    name: Run tests
+    runs-on: macos-11.0
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v2
+
+      - name: 🗂 Install SwiftLint
+        run: sh .github/scripts/install_swiftlint.sh
+
+      - name: 🗂 Install SwiftFormat
+        run: sh .github/scripts/install_swiftformat.sh
+
+      - name: 🧽 Run SwiftLint
+        run: swiftlint lint --quiet
+
+      - name: 🧼 Run SwiftFormat
+        run: swiftformat --lint .
+
+      - name: 📋 Build and test
+        run: swift test
+        env:
+          DEVELOPER_DIR: '/Applications/Xcode_12.5.app'
+
