@@ -20,7 +20,7 @@ import PackageDescription
 let package = Package(
     name: "SwiftTypeAdoptionReporter",
     platforms: [
-        SupportedPlatform.macOS(.v10_12),
+        SupportedPlatform.macOS(.v11),
     ],
     products: [
         .executable(
