@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.4
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 // Copyright 2020 Thumbtack, Inc.
@@ -20,7 +20,7 @@ import PackageDescription
 let package = Package(
     name: "SwiftTypeAdoptionReporter",
     platforms: [
-        SupportedPlatform.macOS(.v10_12),
+        SupportedPlatform.macOS(.v11),
     ],
     products: [
         .executable(
@@ -38,11 +38,11 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .upToNextMinor(from: "0.50300.0")), // Minor releases correspond to Swift versions (i.e., use 0.50x000.y with Swift 5.x)
+        .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .upToNextMinor(from: "0.50400.0")), // Minor releases correspond to Swift versions (i.e., use 0.50x000.y with Swift 5.x)
         .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser.git", .upToNextMajor(from: "0.2.0")),
     ],
     targets: [
-        .target(
+        .executableTarget(
             name: "star",
             dependencies: ["STARLib"]
         ),
