@@ -1,6 +1,6 @@
 [![Build Status](https://badgen.net/travis/thumbtack/star)](https://travis-ci.com/thumbtack/star)
-[![License](https://badgen.net/github/license/thumbtack/star)](https://github.com/thumbtack/star/blob/master/LICENSE)
-[![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-orange.svg)](https://swiftpackageindex.com/thumbtack/star)
+[![SPM Latest Version](https://img.shields.io/github/v/release/thumbtack/star?label=SPM)](https://swiftpackageindex.com/thumbtack/star)
+[![License](https://img.shields.io/github/license/thumbtack/star?color=important)](https://github.com/thumbtack/star/blob/main/LICENSE)
 
 # Swift Type Adoption Reporter (STAR)
 
