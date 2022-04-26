@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.6
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 // Copyright 2020 Thumbtack, Inc.
@@ -38,8 +38,8 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .upToNextMinor(from: "0.50500.0")), // Minor releases correspond to Swift versions (i.e., use 0.50x000.y with Swift 5.x)
-        .package(name: "swift-argument-parser", url: "https://github.com/apple/swift-argument-parser.git", .upToNextMajor(from: "0.2.0")),
+        .package(url: "https://github.com/apple/swift-syntax.git", .upToNextMinor(from: "0.50600.0")), // Minor releases correspond to Swift versions (i.e., use 0.50x000.y with Swift 5.x)
+        .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMajor(from: "0.2.0"))
     ],
     targets: [
         .executableTarget(
@@ -49,7 +49,8 @@ let package = Package(
         .target(
             name: "STARLib",
             dependencies: [
-                "SwiftSyntax",
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),
