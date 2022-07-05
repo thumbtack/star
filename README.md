@@ -38,15 +38,16 @@ Pill used 11 times.
 ### Options
 
 ```
-USAGE: star [--types <types> ...] [--module <module>] [--format <format>] [--files <files> ...] [--includeTypeInheritance] [--verbose]
+USAGE: star [--types <types> ...] [--module <module>] [--include-syntax <include-syntax> ...] [--format <format>] [--files <files> ...] [--verbose]
 
 OPTIONS:
   -t, --types <types>     List of types on which to report
   -m, --module <module>   Name of module containing types, to ensure types referenced by <module name>.<type name> are counted
+  --include-syntax <include-syntax>
+                          Syntax conditions to include in usage counts (constructorCall, staticPropertyReference, typeInheritance) (default:
+                          constructorCall, staticPropertyReference)
   -f, --format <format>   Output format (humanReadable|json) (default: humanReadable)
   --files <files>         Paths in which to look for Swift source
-  --includeTypeInheritance
-                          Include subclass and protocol conformance declarations in usage counts
   -v, --verbose           Print additional information about source as it is parsed
   -h, --help              Show help information.
 ```
