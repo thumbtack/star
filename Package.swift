@@ -38,8 +38,9 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git", .upToNextMinor(from: "0.50600.0")), // Minor releases correspond to Swift versions (i.e., use 0.50x000.y with Swift 5.x)
-        .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMajor(from: "0.2.0"))
+        // Major releases correspond to Swift versions (i.e., use 50x.0.0 with Swift 5.x)
+        .package(url: "https://github.com/apple/swift-syntax.git", .upToNextMajor(from: "509.0.0")),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMajor(from: "0.5.0")),
     ],
     targets: [
         .executableTarget(
@@ -50,7 +51,7 @@ let package = Package(
             name: "STARLib",
             dependencies: [
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),
