@@ -50,9 +50,9 @@ let package = Package(
         .target(
             name: "STARLib",
             dependencies: [
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftParser", package: "swift-syntax"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                Target.Dependency.product(name: "SwiftSyntax", package: "swift-syntax"),
+                Target.Dependency.product(name: "SwiftParser", package: "swift-syntax"),
+                Target.Dependency.product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),
         .testTarget(
